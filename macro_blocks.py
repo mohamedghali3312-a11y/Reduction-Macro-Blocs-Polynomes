@@ -63,7 +63,7 @@ def reduction_hierarchique_cascade(couples_ba: list) -> dict:
         "degre_initial": len(couples_ba),
         "nb_etapes_reduction": len(niveaux) - 1,
         "niveaux": niveaux,
-        "valeur_finale": courant,
+        "valeur_finale": courant[0],
     }
 
 
@@ -71,7 +71,7 @@ def degonfler_polynome(coeffs_desc: list, facteur_a_n: complex) -> list:
     n = len(coeffs_desc) - 1
     if n < 1:
         raise ValueError("Le polynôme doit être de degré >= 1.")
-    sous_coeffs = list((coeffs_desc,))
+    sous_coeffs = list((coeffs_desc[0],))
     for idx in range(1, n):
         val = coeffs_desc[idx] - facteur_a_n * sous_coeffs[-1]
         sous_coeffs.append(val)
