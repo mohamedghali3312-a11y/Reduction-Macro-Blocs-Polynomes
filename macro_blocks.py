@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Réduction et Factorisation Spatiale des Polynômes par Macro-Blocs Combinatoires
+Théorie de la Réduction et Factorisation Spatiale des Polynômes
+par Macro-Blocs Combinatoires — Moteur Complet
 Auteur : Mohamed Ghali (2026)
 """
 
@@ -40,11 +41,37 @@ def calculer_macro_blocs(couples_ba: list) -> dict:
     }
 
 
+def reduction_hierarchique_cascade(couples_ba: list) -> dict:
+    termes = list(1 + (b / a) for b, a in couples_ba)
+    niveaux = list((list(termes),))
+
+    courant = list(termes)
+    while len(courant) > 1:
+        suivant = list()
+        for j in range(0, len(courant) - 1, 2):
+            u = courant[j] - 1.0
+            v = courant[j + 1] - 1.0
+            S_prime = u + v
+            P_prime = u * v
+            suivant.append(1.0 + S_prime + P_prime)
+        if len(courant) % 2 == 1:
+            suivant.append(courant[-1])
+        courant = suivant
+        niveaux.append(list(courant))
+
+    return {
+        "degre_initial": len(couples_ba),
+        "nb_etapes_reduction": len(niveaux) - 1,
+        "niveaux": niveaux,
+        "valeur_finale": courant,
+    }
+
+
 def degonfler_polynome(coeffs_desc: list, facteur_a_n: complex) -> list:
     n = len(coeffs_desc) - 1
     if n < 1:
         raise ValueError("Le polynôme doit être de degré >= 1.")
-    sous_coeffs = list((coeffs_desc[0],))
+    sous_coeffs = list((coeffs_desc,))
     for idx in range(1, n):
         val = coeffs_desc[idx] - facteur_a_n * sous_coeffs[-1]
         sous_coeffs.append(val)
@@ -83,7 +110,7 @@ def simuler_cascade_optique(reflexions_r: list) -> dict:
 
 if __name__ == "__main__":
     print("=" * 72)
-    print("THÉORÈME DE RÉDUCTION PAR MACRO-BLOCS COMBINATOIRES — DÉMONSTRATION")
+    print("THÉORÈME DES MACRO-BLOCS COMBINATOIRES — DÉMONSTRATION COMPLÈTE")
     print("=" * 72)
 
     couples_5 = list(((2.0, 1.0), (3.0, 2.0), (5.0, 4.0), (7.0, 3.0), (11.0, 5.0)))
@@ -91,5 +118,9 @@ if __name__ == "__main__":
     print(f"1. Cas impair (n=5) : Direct = {res_5['produit_direct']:.6f} | "
           f"Macro-Blocs = {res_5['produit_macro_blocs']:.6f}")
 
+    cascade = reduction_hierarchique_cascade(couples_5)
+    print(f"2. Effondrement en cascade (n=5 -> 3 -> 2 -> 1) : "
+          f"Valeur finale = {cascade['valeur_finale']:.6f} en {cascade['nb_etapes_reduction']} étapes")
+
     optique_6 = simuler_cascade_optique(list((0.1, 0.2, 0.15, 0.25, 0.1, 0.3)))
-    print(f"2. Optique complexe (n=6) : Écart numérique = {optique_6['ecart_numerique']:.2e}")
+    print(f"3. Optique complexe (n=6) : Écart numérique = {optique_6['ecart_numerique']:.2e}")
