@@ -1,0 +1,11 @@
+name = "macro_blocs_polynomes"
+version = "0.1.0"
+defaultTargets = ["proofs_macro_blocks"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.12.0"
+
+[[lean_lib]]
+name = "proofs_macro_blocks"
