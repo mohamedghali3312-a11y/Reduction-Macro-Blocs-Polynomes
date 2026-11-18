@@ -26,4 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
         with:
-          lake-update: true
+          build: false
+      - run: |
+          lake update
+          lake exe cache get
+          lake build
