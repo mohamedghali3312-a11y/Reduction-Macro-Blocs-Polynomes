@@ -1,126 +1,30 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Théorie de la Réduction et Factorisation Spatiale des Polynômes
-par Macro-Blocs Combinatoires — Moteur Complet
-Auteur : Mohamed Ghali (2026)
-"""
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Data.Real.Basic
 
-import math
+theorem macro_block_pair_identity (a1 b1 a2 b2 x : Real) (ha1 : a1 ≠ 0) (ha2 : a2 ≠ 0) :
+    let S := b1 / a1 + b2 / a2
+    let P := (b1 * b2) / (a1 * a2)
+    (1 + (b1 / a1) * x) * (1 + (b2 / a2) * x) = 1 + S * x + P * x ^ 2 := by
+  intro S P
+  dsimp only [S, P]
+  field_simp
+  ring
 
+theorem proportionality_law_AD_BC (A r5 M : Real) :
+    let B := r5 * A
+    let C := M * A
+    let D := r5 * M * A
+    A * D = B * C := by
+  intro B C D
+  dsimp only [B, C, D]
+  ring
 
-def calculer_macro_blocs(couples_ba: list) -> dict:
-    n = len(couples_ba)
-    k = n // 2
-    blocs = list()
-
-    for j in range(k):
-        b1, a1 = couples_ba[2 * j]
-        b2, a2 = couples_ba[2 * j + 1]
-        S_j = (b1 / a1) + (b2 / a2)
-        P_j = (b1 * b2) / (a1 * a2)
-        blocs.append({"S": S_j, "P": P_j, "valeur_bloc": 1 + S_j + P_j})
-
-    residu = None
-    if n % 2 == 1:
-        b_last, a_last = couples_ba[-1]
-        residu = 1 + (b_last / a_last)
-
-    produit_direct = math.prod(1 + (b / a) for b, a in couples_ba)
-    produit_blocs = math.prod(bloc["valeur_bloc"] for bloc in blocs)
-    if residu is not None:
-        produit_blocs *= residu
-
-    return {
-        "degre_n": n,
-        "nb_macro_blocs_k": k,
-        "blocs": blocs,
-        "residu_impair": residu,
-        "produit_direct": produit_direct,
-        "produit_macro_blocs": produit_blocs,
-    }
-
-
-def reduction_hierarchique_cascade(couples_ba: list) -> dict:
-    termes = list(1 + (b / a) for b, a in couples_ba)
-    niveaux = list((list(termes),))
-
-    courant = list(termes)
-    while len(courant) > 1:
-        suivant = list()
-        for j in range(0, len(courant) - 1, 2):
-            u = courant[j] - 1.0
-            v = courant[j + 1] - 1.0
-            S_prime = u + v
-            P_prime = u * v
-            suivant.append(1.0 + S_prime + P_prime)
-        if len(courant) % 2 == 1:
-            suivant.append(courant[-1])
-        courant = suivant
-        niveaux.append(list(courant))
-
-    return {
-        "degre_initial": len(couples_ba),
-        "nb_etapes_reduction": len(niveaux) - 1,
-        "niveaux": niveaux,
-        "valeur_finale": courant,
-    }
-
-
-def degonfler_polynome(coeffs_desc: list, facteur_a_n: complex) -> list:
-    n = len(coeffs_desc) - 1
-    if n < 1:
-        raise ValueError("Le polynôme doit être de degré >= 1.")
-    sous_coeffs = list((coeffs_desc,))
-    for idx in range(1, n):
-        val = coeffs_desc[idx] - facteur_a_n * sous_coeffs[-1]
-        sous_coeffs.append(val)
-    return sous_coeffs
-
-
-def simuler_cascade_optique(reflexions_r: list) -> dict:
-    n = len(reflexions_r)
-    k = n // 2
-    matrices_blocs = list()
-
-    for j in range(k):
-        r1 = reflexions_r[2 * j]
-        r2 = reflexions_r[2 * j + 1]
-        S_j = 1j * (r1 + r2)
-        P_j = -(r1 * r2)
-        matrices_blocs.append({"S_j": S_j, "P_j": P_j, "transfert": 1 + S_j + P_j})
-
-    amp_directe = 1.0 + 0.0j
-    for r in reflexions_r:
-        amp_directe *= (1 + 1j * r)
-
-    amp_blocs = 1.0 + 0.0j
-    for bloc in matrices_blocs:
-        amp_blocs *= bloc["transfert"]
-    if n % 2 == 1:
-        amp_blocs *= (1 + 1j * reflexions_r[-1])
-
-    return {
-        "nb_couches": n,
-        "amplitude_directe": amp_directe,
-        "amplitude_macro_blocs": amp_blocs,
-        "ecart_numerique": abs(amp_directe - amp_blocs),
-    }
-
-
-if __name__ == "__main__":
-    print("=" * 72)
-    print("THÉORÈME DES MACRO-BLOCS COMBINATOIRES — DÉMONSTRATION COMPLÈTE")
-    print("=" * 72)
-
-    couples_5 = list(((2.0, 1.0), (3.0, 2.0), (5.0, 4.0), (7.0, 3.0), (11.0, 5.0)))
-    res_5 = calculer_macro_blocs(couples_5)
-    print(f"1. Cas impair (n=5) : Direct = {res_5['produit_direct']:.6f} | "
-          f"Macro-Blocs = {res_5['produit_macro_blocs']:.6f}")
-
-    cascade = reduction_hierarchique_cascade(couples_5)
-    print(f"2. Effondrement en cascade (n=5 -> 3 -> 2 -> 1) : "
-          f"Valeur finale = {cascade['valeur_finale']:.6f} en {cascade['nb_etapes_reduction']} étapes")
-
-    optique_6 = simuler_cascade_optique(list((0.1, 0.2, 0.15, 0.25, 0.1, 0.3)))
-    print(f"3. Optique complexe (n=6) : Écart numérique = {optique_6['ecart_numerique']:.2e}")
+theorem proportionality_law_AF_BE (A r5 M1 M2 : Real) :
+    let B := r5 * A
+    let E := M1 * M2 * A
+    let F := M1 * M2 * r5 * A
+    A * F = B * E := by
+  intro B E F
+  dsimp only [B, E, F]
+  ring
