@@ -1,0 +1,32 @@
+name: Verification Macro-Blocs Python et Lean 4
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  python-tests:
+    name: Tests Unitaires Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          pip install pytest
+          pytest -v
+          python macro_blocks.py
+
+  lean-proofs:
+    name: Verification Formelle Lean 4
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl https://githubusercontent.com -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.12.0
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.12.0
+          $HOME/.elan/bin/lake update
+          $HOME/.elan/bin/lake exe cache get
+          $HOME/.elan/bin/lake build
