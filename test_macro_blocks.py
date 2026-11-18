@@ -1,6 +1,7 @@
 import math
 from macro_blocks import (
     calculer_macro_blocs,
+    reduction_hierarchique_cascade,
     degonfler_polynome,
     simuler_cascade_optique,
 )
@@ -16,6 +17,14 @@ def test_cas_pair_et_impair():
     res_5 = calculer_macro_blocs(couples_5)
     assert res_5["residu_impair"] is not None
     assert math.isclose(res_5["produit_direct"], res_5["produit_macro_blocs"], rel_tol=1e-12)
+
+
+def test_reduction_hierarchique_manuscrit():
+    couples_5 = list(((2.0, 1.0), (3.0, 2.0), (5.0, 4.0), (7.0, 3.0), (11.0, 5.0)))
+    res_direct = calculer_macro_blocs(couples_5)["produit_direct"]
+    cascade = reduction_hierarchique_cascade(couples_5)
+    assert cascade["nb_etapes_reduction"] == 3
+    assert math.isclose(res_direct, cascade["valeur_finale"], rel_tol=1e-12)
 
 
 def test_lois_proportionnalite_degre_5():
